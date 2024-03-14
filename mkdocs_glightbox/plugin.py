@@ -5,7 +5,7 @@ import re
 
 from mkdocs import utils
 from mkdocs.config import config_options
-from mkdocs.plugins import BasePlugin
+from mkdocs.plugins import BasePlugin, event_priority
 
 log = logging.getLogger(__name__)
 base_path = os.path.dirname(os.path.abspath(__file__))
@@ -133,6 +133,13 @@ class LightboxPlugin(BasePlugin):
         )
 
         return html
+
+    # 放在 blog 之后执行，更新首页 excerpt 的内容
+    # https://github.com/squidfunk/mkdocs-material/blob/2f1b2e950040a89e70a5f193de762388206fb8fa/src/plugins/blog/plugin.py#L331
+    @event_priority(-200)
+    def on_page_context(self, context, page, config, nav):
+        for post in context.get('posts', []):
+            post.content = self.on_page_content(post.content, post, config)
 
     def wrap_img_with_anchor(self, match, plugin_config, skip_class, meta):
         """Wrap image tags with anchor tags"""
