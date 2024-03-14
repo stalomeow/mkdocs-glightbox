@@ -175,6 +175,9 @@ class LightboxPlugin(BasePlugin):
                 "caption-position",
                 "gallery",
             ]
+
+            caption = ""
+
             for option in slide_options:
                 attr = f"data-{option}"
                 if attr == "data-title":
@@ -190,6 +193,7 @@ class LightboxPlugin(BasePlugin):
                             val = val.group(1) if val else ""
                     else:
                         val = val.group(1) if val else ""
+                    caption = val
                 elif attr == "data-caption-position":
                     val = re.search(r"data-caption-position=[\"]([^\"]+)", img_attr)
                     val = val.group(1) if val else self.config["caption_position"]
@@ -205,7 +209,11 @@ class LightboxPlugin(BasePlugin):
                     else:
                         a_tag += f' {attr}="{val}"'
             a_tag += f">{img_tag}</a>"
-            return a_tag
+
+            if caption != "":
+                return f"<figure>{a_tag}<figcaption>{caption}</figcaption></figure>"
+            else:
+                return a_tag
         except Exception as e:
             log.warning(
                 f"Error in wrapping img tag with anchor tag: {e} {match.group(0)}"
